@@ -24,6 +24,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
 import ImageUpload from "./ImageUpload";
+import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 
 const AuthForm = <T extends FieldValues>({ 
@@ -33,14 +35,32 @@ const AuthForm = <T extends FieldValues>({
   onSubmit 
 }: AuthFormProps<T>) => {
   const isSignIn = type === "SIGN_IN";
+  const router = useRouter();
 
   const form: UseFormReturn<T> = useForm({
     resolver: zodResolver(schema),
     defaultValues: defaultValues as DefaultValues<T>,
   });
 
-  const handleSubmit:SubmitHandler<T> = (data) => {
-    console.log(data);
+  const handleSubmit:SubmitHandler<T> = async (data) => {
+    const result = await onSubmit(data);
+
+    if (result.success) {
+      toast({
+        title: "Success",
+        description: isSignIn 
+        ? "You have successfully signed in" 
+        : "You have successfully signed up",
+      });
+    } else {
+      toast({
+        title: `Error ${isSignIn ? "signing in" : "signing up"}`,
+        description: result.error ?? "An error occured.",
+        variant: "destructive"
+      });
+    };
+
+    router.push("/")
   };
 
   return (

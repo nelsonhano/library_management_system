@@ -2,6 +2,7 @@
 
 import { signUpSchema } from '@/lib/validation';
 import AuthForm from '@/components/AuthForm';
+import { signUp } from '@/lib/action/auth';
 
 export default function page() {
   return (
@@ -16,7 +17,7 @@ export default function page() {
           universityId: 0,
           universityCard: ""
         }}
-        onSubmit={() => {}}
+        onSubmit={signUp}
       />
     </div>
   );
