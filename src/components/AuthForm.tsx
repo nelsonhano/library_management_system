@@ -6,7 +6,7 @@ import { DefaultValues, FieldValues, Path, SubmitHandler, useForm, UseFormReturn
 
 interface AuthFormProps<T extends FieldValues>{
   schema: ZodType<T>;
-  defaultValues: T;
+   defaultValues: T;
   onSubmit: (data: T) => Promise<{success: boolean; error?: string }>;
   type: "SIGN_IN" | "SIGN_UP"
 };
