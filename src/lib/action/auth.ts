@@ -1,13 +1,17 @@
 "use server";
 
-import { db } from "@/database/drizzle";
+import { redirect } from "next/navigation";
 import { users } from "@/database/schema";
-import { hash } from "bcryptjs";
-import { eq } from "drizzle-orm";
+import workFlowClient from "../workFlow";
+import { db } from "@/database/drizzle";
 import { signIn } from "../../../auth";
 import { headers } from "next/headers";
 import ratelimit from "../rateLimit";
-import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
+import { hash } from "bcryptjs";
+import config from "../config";
+
+const { env: { prodApiEndPoint }} = config;
 
 export const signInWithCredentials = async (
     params: Pick<AuthCredentials, "email"|"password">
@@ -64,6 +68,14 @@ export const signUp = async (params: AuthCredentials) => {
             universityId,
             password: hashedPassword,
             universityCard
+        });
+
+        await workFlowClient.trigger({
+            url: `${prodApiEndPoint}/api/workflows/onboarding`,
+            body: {
+                email,
+                fullName,
+            },
         });
 
         await signInWithCredentials({ email, password });

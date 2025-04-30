@@ -60,8 +60,8 @@ export default function ImageUpload({
     onFileChange(res.filePath);
 
     toast({
-      title: "Scheduled: Catch up",
-      description: "Friday, February 10, 2023 at 5:57 PM",
+      title: `${res.type} uploaded successfully`,
+      description: `${res.filePath} uploaded successfully!`,
     });
   };
   return (
