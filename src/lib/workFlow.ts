@@ -50,20 +50,17 @@ export const sendEmail = async ({
             emailParams,
         ).then(
             function (response) {
-                console.log("SUCCESS!", response.status, response.text);
-                toast({
+                console.log({
                     title: "Succes",
-                    description: "Thanks, message sent successfully",
+                    description: `Thanks, message sent successfully ${response}`,
                 });
             },
 
             function (error) {
-                toast({
+                console.log({
                     title: "Error",
-                    description: "OOPs something went wrong... Try again later",
-                    variant: "destructive"
+                    description: `OOPs something went wrong... Try again later ${error}`,
                 });
-                console.log("FAILED...", error);
             });
     } catch (error) {
         console.log(error);
