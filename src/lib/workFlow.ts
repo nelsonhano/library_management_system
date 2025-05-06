@@ -1,8 +1,7 @@
 import { Client as WorkFlowClient } from "@upstash/workflow";
-import emailjs from '@emailjs/browser';
+import emailjs from 'emailjs-com';
 
 import config from "./config";
-import { toast } from "@/hooks/use-toast";
 
 const {
     env: {
