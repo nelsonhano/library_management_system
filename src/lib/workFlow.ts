@@ -2,6 +2,7 @@ import { Client as WorkFlowClient } from "@upstash/workflow";
 import emailjs from '@emailjs/browser';
 
 import config from "./config";
+import { toast } from "@/hooks/use-toast";
 
 const {
     env: {
@@ -24,20 +25,46 @@ export default workFlowClient;
 
 
 export const sendEmail = async ({
-    email,
-    subject,
+    title,
+    name,
     message,
+    email,
 }: {
-    email: string;
-    subject: string;
-    message: string;
+    title: string,
+    name: string,
+    message: string,
+    email: string,
 }) => {
+    const emailParams = {
+        title,
+        name,
+        message,
+        email
+    };
+    // emailJsPublicKey
+    
     try {
-        await emailjs.send(emailJsServiceId, emailJsTemplateId, {
-            email,
-            subject,
-            message
-        }, emailJsPublicKey);
+        await emailjs.send(
+            emailJsServiceId, 
+            emailJsTemplateId,
+            emailParams,
+        ).then(
+            function (response) {
+                console.log("SUCCESS!", response.status, response.text);
+                toast({
+                    title: "Succes",
+                    description: "Thanks, message sent successfully",
+                });
+            },
+
+            function (error) {
+                toast({
+                    title: "Error",
+                    description: "OOPs something went wrong... Try again later",
+                    variant: "destructive"
+                });
+                console.log("FAILED...", error);
+            });
     } catch (error) {
         console.log(error);
     }
