@@ -41,13 +41,13 @@ export const sendEmail = async ({
         message,
         email
     };
-    // emailJsPublicKey
     
     try {
         await emailjs.send(
             emailJsServiceId, 
             emailJsTemplateId,
             emailParams,
+            emailJsPublicKey
         ).then(
             function (response) {
                 console.log({
