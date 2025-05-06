@@ -59,7 +59,7 @@ export const sendEmail = async ({
             function (error) {
                 console.log({
                     title: "Error",
-                    description: `OOPs something went wrong... Try again later ${error}`,
+                    description: `${error} OOPs something went wrong... Try again later`,
                 });
             });
     } catch (error) {
