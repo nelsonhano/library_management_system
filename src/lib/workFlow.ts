@@ -1,5 +1,5 @@
 import { Client as WorkFlowClient } from "@upstash/workflow";
-import emailjs from 'emailjs-com';
+import emailjs from '@emailjs/browser';
 
 import config from "./config";
 

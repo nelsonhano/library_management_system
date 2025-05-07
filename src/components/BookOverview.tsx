@@ -7,7 +7,7 @@ export default function BookOverview(
     title, 
     author, 
     genre, 
-    rating, 
+    rating,
     totalCopies, 
     availableCopies, 
     description, 
