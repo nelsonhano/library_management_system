@@ -96,9 +96,9 @@ export default function FileUpload({
           description: 'Please upload a file that is less than 20MB in size',
           variant: 'destructive'
         });
-      }
 
-      return false;
+        return false;
+      }
      } if (type === 'video'){
       if(file.size > 50 * 1024 * 1024){
         toast({
@@ -106,9 +106,9 @@ export default function FileUpload({
           description: 'Please upload a video that is less than 50MB in size',
           variant: 'destructive'
         });
-      }
 
-      return false;
+        return false;
+      }
      }
 
      return true
