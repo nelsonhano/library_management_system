@@ -1,10 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { signOut } from "../../../../auth";
 import BookList from "@/components/BookList";
-import { sampleBooks } from "@/constants";
+import { db } from "@/database/drizzle";
+import { books, borrowRecords } from "@/database/schema";
+import { desc, eq } from "drizzle-orm";
 
-export default function page() {
-  return (
+export default async function page() {
+    const latestBorrowRecords = await db
+        .select({
+            borrow: borrowRecords,
+            book: books,
+        })
+        .from(borrowRecords)
+        .innerJoin(books, eq(borrowRecords.bookId, books.id))
+        .orderBy(desc(borrowRecords.createdAt))
+        .limit(20);
+
+return (
     <>
         <form 
             action={async () => {
@@ -19,8 +31,8 @@ export default function page() {
 
         <BookList
             title="Borrowed Books"
-            books={sampleBooks}
-        />
+            books={latestBorrowRecords.map(record => record.book)}
+            />
     </>
   )
 }

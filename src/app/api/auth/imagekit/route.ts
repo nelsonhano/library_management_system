@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 const { 
     env: { 
-        imaageKit: { 
+        imageKit: { 
             publicKey, 
             urlEndpoint, 
             privateKey 

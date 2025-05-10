@@ -1,5 +1,5 @@
 interface BooksProps {
-    id: number;
+    id: string;
     title: string;
     author: string;
     genre: string;
@@ -49,4 +49,9 @@ interface AuthCredentials{
     password: string;
     universityId: number;
     universityCard: string
+}
+
+interface BorrowBookParams {
+    bookId: string;
+    userId: string;
 }

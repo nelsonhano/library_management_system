@@ -31,7 +31,7 @@ const authenticator = async () => {
 
 const {
   env: {
-    imaageKit: {
+    imageKit: {
       publicKey,
       urlEndpoint,
     }
