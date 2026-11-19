@@ -40,7 +40,7 @@ export default function Sidebar({ session }: { session: Session }) {
                       src={link.img}
                       fill
                       alt="icon"
-                      className={`${isSelcted} ? 'brightness-0 invert' : object-contain`}
+                      className={cn(isSelcted ? "brightness-0 invert" : "object-contain")}
                     />
                   </div>
 

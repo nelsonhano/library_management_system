@@ -52,6 +52,8 @@ const AuthForm = <T extends FieldValues>({
         ? "You have successfully signed in" 
         : "You have successfully signed up",
       });
+
+      router.push("/");
     } else {
       toast({
         title: `Error ${isSignIn ? "signing in" : "signing up"}`,
@@ -59,8 +61,6 @@ const AuthForm = <T extends FieldValues>({
         variant: "destructive"
       });
     };
-
-    router.push("/")
   };
 
   return (
@@ -128,7 +128,7 @@ const AuthForm = <T extends FieldValues>({
 
         <Link
           className="font-bold text-lime-100 underline" 
-          href={isSignIn ? "/sign-up" : "sign-in"} 
+          href={isSignIn ? "/sign-up" : "/sign-in"}
         >
           {isSignIn ? "Create an account" : "Sign in"}
         </Link>

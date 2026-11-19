@@ -17,7 +17,6 @@ interface Props {
 }
 export default function BorrowBook({
     bookId,
-    userId,
     borrowingEligibility:
     { isEligible, message }
 }: Props) {
@@ -31,10 +30,14 @@ export default function BorrowBook({
                 description: message,
                 variant: "destructive"
             });
+
+            return;
         };
 
+        setBorrowing(true);
+
         try {
-            const result = await borrowBook({bookId, userId});
+            const result = await borrowBook({ bookId });
 
             if (result.success) {
                 toast({
@@ -46,12 +49,12 @@ export default function BorrowBook({
             } else {
                 toast({
                     title: "Error",
-                    description: "An error occured while trying borrowing the book",
+                    description: result.error ?? "An error occurred while borrowing the book",
                     variant: "destructive"
                 });
             };
 
-        } catch (error) {
+        } catch {
             toast({
                 title: "Error",
                 description: "An error occurred while borrowing the book",

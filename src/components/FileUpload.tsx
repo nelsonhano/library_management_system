@@ -88,8 +88,8 @@ export default function FileUpload({
     });
   };
 
-   const onValidate = (file: File) => {
-     if (type === 'image') {
+  const onValidate = (file: File) => {
+    if (type === 'image') {
       if(file.size > 20 * 1024 * 1024){
         toast({
           title: 'File size too large',
@@ -99,7 +99,9 @@ export default function FileUpload({
 
         return false;
       }
-     } if (type === 'video'){
+    } 
+    
+    if (type === 'video'){
       if(file.size > 50 * 1024 * 1024){
         toast({
           title: 'Video size too large',
@@ -109,10 +111,10 @@ export default function FileUpload({
 
         return false;
       }
-     }
+    }
 
-     return true
-   }
+    return true
+  }
   return (
     <ImageKitProvider
       publicKey={publicKey}

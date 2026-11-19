@@ -1,6 +1,6 @@
 import React from "react";
 import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import BookOverview from "@/components/BookOverview";
 import BookVideo from "@/components/BookVideo";
@@ -13,6 +13,11 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     const id = (await params).id;
     const session = await auth();
 
+    // Postgres throws on a malformed uuid, so reject it before querying.
+    const UUID_REGEX =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_REGEX.test(id)) notFound();
+
     // Fetch data based on id
     const [bookDetails] = await db
         .select()
@@ -20,7 +25,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
         .where(eq(books.id, id))
         .limit(1);
 
-    if (!bookDetails) redirect("/404");
+    if (!bookDetails) notFound();
 
     return (
         <>

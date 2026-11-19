@@ -4,8 +4,11 @@ import BookList from "@/components/BookList";
 import { db } from "@/database/drizzle";
 import { books, borrowRecords } from "@/database/schema";
 import { desc, eq } from "drizzle-orm";
+import { auth } from "../../../../auth";
 
 export default async function page() {
+    const session = await auth();
+
     const latestBorrowRecords = await db
         .select({
             borrow: borrowRecords,
@@ -13,6 +16,7 @@ export default async function page() {
         })
         .from(borrowRecords)
         .innerJoin(books, eq(borrowRecords.bookId, books.id))
+        .where(eq(borrowRecords.userId, session?.user?.id as string))
         .orderBy(desc(borrowRecords.createdAt))
         .limit(20);
 

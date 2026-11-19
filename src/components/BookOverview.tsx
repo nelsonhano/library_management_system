@@ -35,7 +35,7 @@ export default async function BookOverview(
   if (!user) return null;
 
   const borrowingEligibility = {
-    isEligible: availableCopies >= 0 && user.status === "APPROVED",
+    isEligible: availableCopies > 0 && user.status === "APPROVED",
     message: availableCopies <= 0 ? "Book is not available to borrow" : 
     "You are not eligible to borrow this book"
   }

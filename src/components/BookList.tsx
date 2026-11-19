@@ -12,7 +12,7 @@ export default function BookList(
   { title, books, containerClassName }: 
   BookListProps
 ) {
-  if (books.length < 2) return;
+  if (books.length === 0) return null;
   
   return (
     <section className={cn(containerClassName)}>

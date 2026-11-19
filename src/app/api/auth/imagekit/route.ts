@@ -6,7 +6,7 @@ const {
     env: { 
         imageKit: { 
             publicKey, 
-            urlEndpoint, 
+            urlEndpoint,    
             privateKey 
         } 
     } 

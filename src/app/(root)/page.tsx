@@ -14,7 +14,11 @@ export default async function Home() {
     .limit(20)
     .orderBy(desc(books.createdAt))
   ) as Book[]
-  
+
+  if (latestBooks.length === 0) {
+    return <p className="text-light-100">No books available yet.</p>;
+  }
+
   return (
     <main>
       <BookOverview 

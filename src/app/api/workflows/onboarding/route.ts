@@ -14,7 +14,6 @@ type InitialData = {
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const THREE_DAYS_IN_MS = 3 * ONE_DAY_IN_MS;
-const THIRTY_DAYS_IN_MS = 30 * ONE_DAY_IN_MS;
 
 const getUserState = async (email: string): Promise<UserState> => {
     const user = await db
@@ -29,10 +28,9 @@ const getUserState = async (email: string): Promise<UserState> => {
     const now = new Date();
     const timeDifference = now.getTime() - lastActivityDate.getTime();
 
-    if (
-        timeDifference > THREE_DAYS_IN_MS &&
-        timeDifference <= THIRTY_DAYS_IN_MS
-    ) {
+    // Anyone idle more than 3 days is non-active (previously, users idle
+    // over 30 days were wrongly treated as active).
+    if (timeDifference > THREE_DAYS_IN_MS) {
         return "non-active";
     }
 
