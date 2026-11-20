@@ -71,3 +71,75 @@ export const borrowBook = async (params: Pick<BorrowBookParams, "bookId">) => {
         };
     }
 };
+
+export const returnBook = async (params: ReturnBookParams) => {
+    const { recordId } = params;
+
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    if (!userId) {
+        return { success: false, error: "You must be signed in to return a book" };
+    }
+
+    try {
+        const [record] = await db
+            .select()
+            .from(borrowRecords)
+            .where(eq(borrowRecords.id, recordId))
+            .limit(1);
+
+        if (!record) {
+            return { success: false, error: "Borrow record not found" };
+        }
+
+        if (record.status === "RETURNED") {
+            return { success: false, error: "This book has already been returned" };
+        }
+
+        const [caller] = await db
+            .select({ role: users.role })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
+
+        const isAdmin = caller?.role === "ADMIN";
+        const isOwner = record.userId === userId;
+
+        if (!isOwner && !isAdmin) {
+            return { success: false, error: "Unauthorized to return this book" };
+        }
+
+        const today = dayjs().format("YYYY-MM-DD");
+
+        const updatedRecord = await db
+            .update(borrowRecords)
+            .set({
+                status: "RETURNED",
+                returnDate: today,
+            })
+            .where(and(eq(borrowRecords.id, recordId), eq(borrowRecords.status, "BORROWED")))
+            .returning();
+
+        if (!updatedRecord.length) {
+            return { success: false, error: "This book has already been returned" };
+        }
+
+        await db
+            .update(books)
+            .set({ availableCopies: sql`${books.availableCopies} + 1` })
+            .where(eq(books.id, record.bookId));
+
+        return {
+            success: true,
+            data: JSON.parse(JSON.stringify(updatedRecord[0])),
+        };
+    } catch (error) {
+        console.log(error);
+
+        return {
+            success: false,
+            error: "An error occurred while returning the book",
+        };
+    }
+};

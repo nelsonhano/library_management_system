@@ -11,7 +11,7 @@ vi.mock("@/database/drizzle", async () => ({
 const authMock = vi.fn();
 vi.mock("../../../auth", () => ({ auth: () => authMock() }));
 
-import { borrowBook } from "./book";
+import { borrowBook, returnBook } from "./book";
 
 const SESSION_USER = "11111111-1111-1111-1111-111111111111";
 const BOOK_ID = "22222222-2222-2222-2222-222222222222";
@@ -126,5 +126,124 @@ describe("borrowBook", () => {
             success: false,
             error: "An error occurred while borrowing the book",
         });
+    });
+});
+
+describe("returnBook", () => {
+    const RECORD_ID = "33333333-3333-3333-3333-333333333333";
+    const OTHER_USER = "44444444-4444-4444-4444-444444444444";
+
+    beforeEach(() => {
+        dbMock.reset();
+        authMock.mockResolvedValue({ user: { id: SESSION_USER } });
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-11-20T10:00:00"));
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it("refuses to return when nobody is signed in, without touching the database", async () => {
+        authMock.mockResolvedValue(null);
+
+        const result = await returnBook({ recordId: RECORD_ID });
+
+        expect(result).toEqual({
+            success: false,
+            error: "You must be signed in to return a book",
+        });
+        expect(dbMock.calls).toHaveLength(0);
+    });
+
+    it("returns error when borrow record is not found", async () => {
+        dbMock.queue([]);
+
+        const result = await returnBook({ recordId: RECORD_ID });
+
+        expect(result).toEqual({
+            success: false,
+            error: "Borrow record not found",
+        });
+        expect(dbMock.ops("update")).toHaveLength(0);
+    });
+
+    it("refuses to return when record is already RETURNED", async () => {
+        dbMock.queue([{ id: RECORD_ID, status: "RETURNED", userId: SESSION_USER }]);
+
+        const result = await returnBook({ recordId: RECORD_ID });
+
+        expect(result).toEqual({
+            success: false,
+            error: "This book has already been returned",
+        });
+        expect(dbMock.ops("update")).toHaveLength(0);
+    });
+
+    it("refuses when non-admin student attempts to return someone else's book", async () => {
+        dbMock.queue(
+            [{ id: RECORD_ID, status: "BORROWED", userId: OTHER_USER, bookId: BOOK_ID }],
+            [{ role: "USER" }]
+        );
+
+        const result = await returnBook({ recordId: RECORD_ID });
+
+        expect(result).toEqual({
+            success: false,
+            error: "Unauthorized to return this book",
+        });
+        expect(dbMock.ops("update")).toHaveLength(0);
+    });
+
+    it("allows a student to return their own book and increments available copies", async () => {
+        const updatedRecord = {
+            id: RECORD_ID,
+            status: "RETURNED",
+            returnDate: "2026-11-20",
+            userId: SESSION_USER,
+            bookId: BOOK_ID,
+        };
+
+        dbMock.queue(
+            [{ id: RECORD_ID, status: "BORROWED", userId: SESSION_USER, bookId: BOOK_ID }],
+            [{ role: "USER" }],
+            [updatedRecord],
+            [{ id: BOOK_ID }]
+        );
+
+        const result = await returnBook({ recordId: RECORD_ID });
+
+        expect(result).toEqual({ success: true, data: updatedRecord });
+
+        const recordUpdate = dbMock.ops("update")[0];
+        expect(dbMock.arg(recordUpdate, "set")).toEqual({
+            status: "RETURNED",
+            returnDate: "2026-11-20",
+        });
+
+        const bookUpdate = dbMock.ops("update")[1];
+        const set = dbMock.arg(bookUpdate, "set") as { availableCopies: unknown };
+        expect(toSql(set.availableCopies)).toMatch(/"available_copies" \+ 1/);
+    });
+
+    it("allows an admin to return any student's book", async () => {
+        const updatedRecord = {
+            id: RECORD_ID,
+            status: "RETURNED",
+            returnDate: "2026-11-20",
+            userId: OTHER_USER,
+            bookId: BOOK_ID,
+        };
+
+        dbMock.queue(
+            [{ id: RECORD_ID, status: "BORROWED", userId: OTHER_USER, bookId: BOOK_ID }],
+            [{ role: "ADMIN" }],
+            [updatedRecord],
+            [{ id: BOOK_ID }]
+        );
+
+        const result = await returnBook({ recordId: RECORD_ID });
+
+        expect(result).toEqual({ success: true, data: updatedRecord });
     });
 });

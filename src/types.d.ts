@@ -11,7 +11,13 @@ interface BooksProps {
     coverUrl: string;
     videoUrl: string;
     summary: string;
-    isLoanedBook?: boolean
+    isLoanedBook?: boolean;
+    borrowRecordId?: string;
+    dueDate?: string;
+    borrowDate?: string;
+    userName?: string;
+    userEmail?: string;
+    universityId?: number | string;
 };
 
 interface Book {
@@ -43,6 +49,14 @@ interface BookParams {
     summary: string;
 }
 
+interface UpdateBookParams extends BookParams {
+    id: string;
+}
+
+interface DeleteBookParams {
+    bookId: string;
+}
+
 interface AuthCredentials{
     fullName: string;
     email: string;
@@ -54,4 +68,13 @@ interface AuthCredentials{
 interface BorrowBookParams {
     bookId: string;
     userId: string;
+}
+
+interface ReturnBookParams {
+    recordId: string;
+}
+
+interface ChangeUserAccountStatusParams {
+    userId: string;
+    status: "PENDING" | "APPROVED" | "REJECTED";
 }

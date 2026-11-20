@@ -51,6 +51,9 @@ const db = new Proxy(
     {},
     {
         get(_target, op) {
+            if (op === "transaction") {
+                return (callback: (tx: any) => Promise<any>) => callback(db);
+            }
             return (...args: unknown[]) => {
                 const record: QueryRecord = {
                     op: String(op),

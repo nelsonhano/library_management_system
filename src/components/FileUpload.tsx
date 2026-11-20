@@ -8,26 +8,24 @@ import { useToast } from "@/hooks/use-toast";
 import config from "@/lib/config";
 import { cn } from "@/lib/utils";
 
-const authenticator = async () => {
-  const { env: { apiEndPoint } } = config;
-  
+export const authenticator = async () => {
   try {
-    const response = await fetch(`${apiEndPoint}/api/auth/imagekit`);
+    const response = await fetch("/api/auth/imagekit");
 
     if (!response.ok) {
       const errorText = await response.text();
       
-      throw new Error(`Reqest failed with status ${response.status}: ${errorText}`)
-    };
+      throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+    }
 
     const data = await response.json();
     const { expire, signature, token } = data;
     
     return { expire, signature, token };
   } catch (error: any) {
-    throw new Error(`Authentication request failed: ${error.message}`)
+    throw new Error(`Authentication request failed: ${error.message}`);
   }
-}
+};
 
 const {
   env: {

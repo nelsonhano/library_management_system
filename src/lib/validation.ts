@@ -28,3 +28,16 @@ export const bookSchema = z.object({
     videoUrl: z.string().nonempty(),
     summary: z.string().trim().min(10),
 });
+
+export const changeUserAccountStatusSchema = z.object({
+    userId: z.string().uuid(),
+    status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
+});
+
+export const updateBookSchema = bookSchema.extend({
+    id: z.string().uuid(),
+});
+
+export const deleteBookSchema = z.object({
+    bookId: z.string().uuid(),
+});
