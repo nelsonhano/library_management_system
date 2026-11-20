@@ -7,7 +7,7 @@ import { users } from "@/database/schema";
 import { db } from "@/database/drizzle";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
     session: {
         strategy: "jwt",
     },

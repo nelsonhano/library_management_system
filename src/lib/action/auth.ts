@@ -80,53 +80,61 @@ export const signUp = async (params: AuthCredentials) => {
     }
     if (isRateLimited) return redirect("/too-fast");
 
-    const existingUser = await db.select()
-    .from(users)
-    .where(or(eq(users.email, email), eq(users.universityId, universityId)))
-    .limit(1);
+    try {
+        const existingUser = await db.select()
+        .from(users)
+        .where(or(eq(users.email, email), eq(users.universityId, universityId)))
+        .limit(1);
 
-    if (existingUser.length > 0) {
+        if (existingUser.length > 0) {
+            return {
+                success: false,
+                error: existingUser[0].email === email
+                    ? "User already exists"
+                    : "University ID is already registered"
+            }
+        };
+
+        const hashedPassword = await hash(password, 10);
+
+        try {
+            await db.insert(users).values({
+                fullName,
+                email,
+                universityId,
+                password: hashedPassword,
+                universityCard
+            });
+        } catch (error) {
+            console.log(error, "Signup error");
+            return { success: false, error: "Signup error" }
+        }
+
+        // The account now exists. A failed onboarding email must not report
+        // the whole sign up as failed (the user could never retry: "already exists").
+        try {
+            await workFlowClient.trigger({
+                url: `${prodApiEndPoint}/api/workflows/onboarding`,
+                body: {
+                    email,
+                    fullName,
+                },
+            });
+        } catch (error) {
+            console.log(error, "Onboarding workflow trigger failed");
+        }
+
+        await signInWithCredentials({ email, password });
+
+        return { success: true }
+    } catch (error) {
+        if (isRedirectError(error)) throw error;
+        console.error("Signup error:", error);
         return {
             success: false,
-            error: existingUser[0].email === email
-                ? "User already exists"
-                : "University ID is already registered"
-        }
-    };
-
-    const hashedPassword = await hash(password, 10);
-
-
-    try {
-        await db.insert(users).values({
-            fullName,
-            email,
-            universityId,
-            password: hashedPassword,
-            universityCard
-        });
-    } catch (error) {
-        console.log(error, "Signup error");
-        return { success: false, error: "Signup error" }
+            error: error instanceof Error ? error.message : "Signup error"
+        };
     }
-
-    // The account now exists. A failed onboarding email must not report
-    // the whole sign up as failed (the user could never retry: "already exists").
-    try {
-        await workFlowClient.trigger({
-            url: `${prodApiEndPoint}/api/workflows/onboarding`,
-            body: {
-                email,
-                fullName,
-            },
-        });
-    } catch (error) {
-        console.log(error, "Onboarding workflow trigger failed");
-    }
-
-    await signInWithCredentials({ email, password });
-
-    return { success: true }
 };
 
 // export const signIn = async (params: Pick<AuthCredentials>) => { };
